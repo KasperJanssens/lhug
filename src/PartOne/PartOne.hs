@@ -319,10 +319,19 @@ deriveGEq x y  =  geq (toRep x) (toRep y)
 
 instance GEq Bool where
   geq  =  deriveGEq
-
+-- deriveGeq mag toegepast worden als Maybe a Representable is (check)
+-- en als GEq (Rep (Maybe a)) Representable is. Maybe a zijn Representable is
+-- One + a. x + y is GEq als x en y GEq zijn. One is GEq, zo gedefineerd, en de voorwaarde
+-- voor Maybe a GEq te zijn is instance GEq a. Check.
 instance GEq a => GEq (Maybe a) where
   geq  =  deriveGEq
 
+
+{- deriveGEq mag toegepast worden als [a] Representable is, check en als Rep [a] instance is van GEq
+Rep [a] is One + (a * [a]). Volgens GEq (x + y) moet One instance zijn van GEq (check) en moet
+(a * [a]) instance zijn van GEq. VOlgens Geq (x * y) moet a instance zijn van GEq (afgedwongen) en moet
+[a] instance zijn van GEq. Waarom is dat juist zo? Recursieve definitie of zoiets.
+-}
 instance GEq a => GEq [a] where
   geq  =  deriveGEq
 
@@ -330,10 +339,52 @@ instance GEq a => GEq [a] where
 --  (a)  Ordering
 --  (b)  Tree a
 --  (c)  RoseTree a
+instance GEq Ordering where
+  geq = deriveGEq
+
+instance GEq a => GEq (Tree a) where
+  geq = deriveGEq
+
+instance GEq a => GEq (RoseTree a) where
+  geq = deriveGEq
 
 -- Ex15: Create a generic definition for ordering
 class GEq a => GOrd a where
   gcompare :: a -> a -> Ordering
+
+instance GOrd One where
+  gcompare One One = EQ
+
+instance (GOrd x, GOrd y) => GOrd (x + y) where
+  gcompare (Inl x1) (Inr y1) = LT
+  gcompare (Inr y1) (Inl x1) = GT
+  gcompare (Inl x1) (Inl x2) = EQ
+  gcompare (Inr y1) (Inr y2) = EQ
+
+instance (GOrd x, GOrd y) => GOrd (x * y) where
+  gcompare (x1 :*: y1) (x2 :*: y2) =
+    let xRes = gcompare x1 x2 in
+    case xRes of
+      EQ -> gcompare y1 y2
+      r -> r
+
+deriveGOrd:: (Representable a, GOrd (Rep a)) => a -> a -> Ordering
+deriveGOrd x y = gcompare (toRep x) (toRep y)
+
+instance GOrd Bool where
+  gcompare = deriveGOrd
+
+instance GOrd a => GOrd (Maybe a) where
+  gcompare = deriveGOrd
+
+instance GOrd a => GOrd [a] where
+  gcompare = deriveGOrd
+
+instance GOrd a => GOrd (Tree a) where
+  gcompare = deriveGOrd
+
+instance GOrd a => GOrd (RoseTree a) where
+  gcompare = deriveGOrd
 
 -- Ex16: Create a generic definition for serialisation.
 --       We use a list of booleans to represent the serialised bitstream.
@@ -341,6 +392,19 @@ class Serialisable a where
   serialise    ::  a -> [Bool]
   deserialise  ::  [Bool] -> a
 
--- Ex17: Advanced
+instance Serialisable One where
+  serialise One = [True]
+  deserialise [True] = One
+
+instance (Serialisable x, Serialisable y) => Serialisable (x + y) where
+  serialise (Inl x) = [True] ++ serialise x
+  serialise (Inr y) = [False] ++ serialise y
+  deserialise (True:rest) = Inl $ deserialise rest
+  deserialise (False:rest) = Inr $ deserialise rest
+
+{-instance (Serialisable x, Serialisable y) => Serialisable (x * y) where
+  serialise (x :*: y) = serialise x ++ serialise y
+  deserialise (first:second:[]) = deserialise first :*: deserialise second
+-- Ex17: Advanced-}
 --   Figure out how to serialise to and from a "ByteString" instead of [Bool].
 --   See the bytestring and bytestring-builder packages on Hackage.
