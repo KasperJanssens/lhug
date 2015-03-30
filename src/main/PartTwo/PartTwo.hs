@@ -164,6 +164,10 @@ instance Evaluable Literal where
 instance Evaluable Add where
   eval' rec (Add l f) = rec l + rec f
 
+instance (Evaluable f, Evaluable g) => Evaluable (f .+ g) where
+  eval' rec (InlF fLeft) = eval' rec fLeft
+  eval' rec (InrF fRight) = eval' rec fRight
+
 display :: (Displayable f) => Fix f -> String
 display = display' display . out
 
@@ -176,6 +180,10 @@ instance Displayable Literal where
 instance Displayable Add where
   display' rec (Add l r) = show (rec l) ++ " + " ++ show (rec r)
 
+instance (Displayable f, Displayable g) => Displayable (f .+ g) where
+  display' rec (InlF fLeft) = display' rec fLeft
+  display' rec (InrF fRight) = display' rec fRight
+
 data Mul r = Mul r r
 
 type ExpExt = (Literal .+ Add .+ Mul)
@@ -183,6 +191,17 @@ type ExpExt = (Literal .+ Add .+ Mul)
 instance Evaluable Mul where
   eval' rec (Mul l r) = rec l * rec r
 
+instance Displayable Mul where
+  display' rec (Mul left right) = show (rec left) ++ " * " ++ show (rec right)
+
+lit :: (Literal <: f) => Int -> Fix f
+lit x = In (inj (Lit x))
+
+add :: (Add <: f) => Fix f -> Fix f -> Fix f
+add left right = In (inj (Add left right))
+
+mul :: (Mul <: f) => Fix f -> Fix f -> Fix f
+mul left right = In (inj (Mul left right))
 
 -- Ex3: Create a modular version for
 --
