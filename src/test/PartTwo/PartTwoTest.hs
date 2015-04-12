@@ -1,19 +1,13 @@
 {-# LANGUAGE  ScopedTypeVariables, TypeOperators #-}
 
-module Main where
+module PartTwo.PartTwoTest where
 
 import Test.Tasty.Hspec
 import Test.Tasty
 import PartTwo.PartTwo
 
-main :: IO ()
-main = do
-  tree <- testSpec "part two" test
-  defaultMain tree
-
-
-test :: Spec
-test = describe "maakt ne keer een sommeke" $ do
+spec :: Spec
+spec = describe "maakt ne keer een sommeke" $ do
   it "kan 1 en 1 optellen" $ do
     let (seven :: Fix (Add .+ Literal)) = add (lit 3) (lit 4)
     eval seven `shouldBe` 7

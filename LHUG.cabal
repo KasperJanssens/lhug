@@ -9,19 +9,22 @@ Cabal-Version:       >=1.8
 
 Library
   Exposed-Modules:     PartOne.PartOne,
-                       PartTwo.PartTwo
+                       PartTwo.PartTwo,
+                       PartThree.PartThree
   Build-Depends:       base >= 4 && < 5,
-                       containers
+                       tasty,
+                       tasty-hunit,
+                       tasty-hspec
   Hs-Source-Dirs:      src/main
   Ghc-Options:         -Wall
 
-Test-Suite part-two
-  Main-Is:  PartTwoTest.hs
+Test-Suite all-tests
+  Main-Is:  AllTests.hs
   type:  exitcode-stdio-1.0
   Build-Depends:   base >= 4 && <5,
                    tasty,
                    tasty-hunit,
                    tasty-hspec,
                    LHUG
-  hs-source-dirs: src/test/PartTwo
+  hs-source-dirs: src/test
 

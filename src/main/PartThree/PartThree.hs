@@ -1,6 +1,8 @@
 {-# LANGUAGE TypeOperators #-}
 
 module PartThree.PartThree where
+
+
 {-
  - Code based on the Leuven Haskell User Group talk "Bringing Functions into the Fold".
  -
@@ -26,7 +28,7 @@ fac2 = fix fac'
 
 -- * BASIC LIST TYPE
 
-data List = Nil | Cons Int List
+data List = Nil | Cons Int List deriving (Show, Eq)
 
 sum :: List -> Int
 sum Nil          =  0
@@ -66,13 +68,13 @@ lengthf = fold 0 (\_ n -> n + 1)
 -- Ex1: Write the following functions in terms of fold
 
 appendf :: List -> List -> List
-appendf leftList = fold leftList Cons
+appendf leftList rightList = fold rightList Cons leftList
 
 reversef :: List -> List
-reversef = fold undefined undefined
+reversef = fold Nil (\x lijst -> appendf lijst (Cons x Nil))
 
 idList :: List -> List
-idList = fold undefined undefined
+idList = fold Nil Cons
 
 
 -- * PATTERN FUNCTOR OF LIST
@@ -98,7 +100,7 @@ listIso = Iso t f where
 -- Ex2: Establish the following isomorphisms
 listIso2 :: Fix List' <~> List' (Fix List')
 listIso2 = Iso t f where
-  t (In Nil') = Nil'
+  t (In Nil') =  Nil'
   t (In (Cons' x r)) = Cons' x (In (t r))
   f Nil' = In Nil'
   f (Cons' x (In list)) = In (Cons' x (f list))
