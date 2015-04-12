@@ -10,7 +10,8 @@ Cabal-Version:       >=1.8
 Library
   Exposed-Modules:     PartOne.PartOne,
                        PartTwo.PartTwo
-  Build-Depends:       base >= 4 && < 5
+  Build-Depends:       base >= 4 && < 5,
+                       containers
   Hs-Source-Dirs:      src/main
   Ghc-Options:         -Wall
 
