@@ -134,7 +134,7 @@ length3 = gfold alg where
 
 data Exp = Lit Int | Add Exp Exp
 
-data Exp' r = Lit' Int | Add' r r
+data Exp' r = Lit' Int | Add' r r deriving Show
 
 instance Functor Exp' where
   fmap f (Lit' n)    =  Lit' n
@@ -160,24 +160,43 @@ parens s  = "(" ++ s ++ ")"
 
 showExp2 :: Fix Exp' -> String
 showExp2  =  gfold alg where
-  alg = undefined
+  alg (Lit' n) = show n
+  alg (Add' stringExp1 stringExp2) = parens stringExp1 ++ "+" ++ parens stringExp2
+
 
 -- Ex5: Write a specialised version of gfold for Exp,
 --      just like fold is a specialised version of gfold for List,
 --      and write eval in terms of it.
 
+foldExp :: (a -> a -> a) -> (Int -> a) -> Exp -> a
+foldExp functie leafFunction = go
+  where
+      go (Lit x) = leafFunction x
+      go (Add x1 x2) = functie (go x1) (go x2)
+
+eval3 = foldExp (+) id
+
+--    (Lit' x) -> leafFunction x
+--    (Add' left right) -> functie left right
+
 -- Ex6: Write an identity function that is generic in the functor f as a fold.
 
 gId :: Functor f => Fix f -> Fix f
-gId = gfold undefined
+gId = gfold In
 
 -- Ex7: Create a list type that is polymorphic in its type of elements
 --      and write its pattern functor.
+
+data PolymorphicList  a = NilPoly | ConsPoly a List deriving (Show, Eq)
+
+data PolymorphicList' a r = NilPoly' | ConsPoly' a r
 
 -- Ex8: (a) Write the pattern functor for the rose trees from Meeting1
 --            data RoseTree a = Node a [RoseTree a]
 --      (b) Use gfold to write a toList function that collects the elements
 --          of the tree in a list.
+
+data RoseTree' a f = Node a [f a]
 
 -- Ex9: (Hard) Write left fold in terms of a right fold
 

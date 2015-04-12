@@ -7,7 +7,7 @@ import Test.Tasty
 import PartTwo.PartTwo
 
 spec :: Spec
-spec = describe "maakt ne keer een sommeke" $ do
+spec = describe "PartTwo" $ do
   it "kan 1 en 1 optellen" $ do
     let (seven :: Fix (Add .+ Literal)) = add (lit 3) (lit 4)
     eval seven `shouldBe` 7
